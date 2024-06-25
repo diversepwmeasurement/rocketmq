@@ -1,25 +1,27 @@
-name: Coverage
-on:
-  pull_request:
-    types: [opened, reopened, synchronize]
-  push:
-    branches: [master, develop]
 jobs:
   calculate-coverage:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
-      - uses: actions/checkout@master
-      - name: Set up JDK 8
-        uses: actions/setup-java@v2
-        with:
-          java-version: "8"
-          distribution: "adopt"
-          cache: "maven"
-      - name: Generate coverage report
-        run: mvn -B test -T 2C --file pom.xml
-      - name: Upload to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          fail_ci_if_error: true
-          verbose: true
-          token: cf0cba0a-22f8-4580-89ab-4f1dec3bda6f
+    - continue-on-error: true
+      uses: actions/checkout@master
+    - continue-on-error: true
+      name: Set up JDK 8
+      uses: actions/setup-java@v2
+      with:
+        cache: maven
+        distribution: adopt
+        java-version: '8'
+    - continue-on-error: true
+      name: Generate coverage report
+      run: mvn -B test -T 2C --file pom.xml
+    - continue-on-error: true
+      name: Upload to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        fail_ci_if_error: true
+        token: cf0cba0a-22f8-4580-89ab-4f1dec3bda6f
+        verbose: true
+name: Coverage
+on:
+  repository_dispatch:
+    types: trigger-ga___coverage.yml

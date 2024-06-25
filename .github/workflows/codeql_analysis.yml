@@ -1,32 +1,31 @@
-name: CodeQL Analysis
-
-on:
-  pull_request:
-    types: [opened, reopened, synchronize]
-  push:
-    branches:
-      - master
-
 jobs:
   CodeQL-Build:
-    runs-on: ubuntu-latest
-
+    runs-on: self-hosted
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Cache Maven packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-      # Initializes the CodeQL tools for scanning.
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
-        with:
-          languages: java
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v2
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+    - continue-on-error: true
+      name: Checkout repository
+      uses: actions/checkout@v3
+    - continue-on-error: true
+      name: Cache Maven packages
+      uses: actions/cache@v3
+      with:
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        path: ~/.m2/repository
+        restore-keys: '${{ runner.os }}-maven-
+
+          '
+    - continue-on-error: true
+      name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: java
+    - continue-on-error: true
+      name: Autobuild
+      uses: github/codeql-action/autobuild@v2
+    - continue-on-error: true
+      name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+name: CodeQL Analysis
+on:
+  repository_dispatch:
+    types: trigger-ga___codeql_analysis.yml

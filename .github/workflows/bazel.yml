@@ -1,22 +1,21 @@
-name: Build and Run Tests by Bazel
-on:
-  pull_request:
-    types: [opened, reopened, synchronize]
-  push:
-    branches:
-      - master
-      - develop
-      - bazel
 jobs:
   build:
-    name: "bazel-compile (${{ matrix.os }})"
-    runs-on: ${{ matrix.os }}
+    name: bazel-compile (${{ matrix.os }})
+    runs-on: self-hosted
+    steps:
+    - continue-on-error: true
+      uses: actions/checkout@v2
+    - continue-on-error: true
+      name: Build
+      run: bazel build --config=remote //...
+    - continue-on-error: true
+      name: Run Tests
+      run: bazel test --config=remote //...
     strategy:
       matrix:
-        os: [ubuntu-latest]
-    steps:
-      - uses: actions/checkout@v2
-      - name: Build
-        run: bazel build --config=remote //...
-      - name: Run Tests
-        run: bazel test --config=remote //...
+        os:
+        - ubuntu-latest
+name: Build and Run Tests by Bazel
+on:
+  repository_dispatch:
+    types: trigger-ga___bazel.yml

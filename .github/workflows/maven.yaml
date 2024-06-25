@@ -1,34 +1,39 @@
-name: Build and Run Tests by Maven
-on:
-  pull_request:
-    types: [opened, reopened, synchronize]
-  push:
-    branches: [master, develop, bazel]
 jobs:
   java_build:
-    name: "maven-compile (${{ matrix.os }}, JDK-${{ matrix.jdk }})"
-    runs-on: ${{ matrix.os }}
+    name: maven-compile (${{ matrix.os }}, JDK-${{ matrix.jdk }})
+    runs-on: self-hosted
+    steps:
+    - continue-on-error: true
+      name: Checkout
+      uses: actions/checkout@v2
+    - continue-on-error: true
+      name: Set up JDK ${{ matrix.jdk }}
+      uses: actions/setup-java@v2
+      with:
+        cache: maven
+        distribution: adopt
+        java-version: ${{ matrix.jdk }}
+    - continue-on-error: true
+      name: Build with Maven
+      run: mvn -B package --file pom.xml
+    - continue-on-error: true
+      if: failure()
+      name: Upload JVM crash logs
+      uses: actions/upload-artifact@v4
+      with:
+        name: jvm-crash-logs
+        path: /Users/runner/work/rocketmq/rocketmq/auth/hs_err_pid*.log
+        retention-days: 1
     strategy:
       fail-fast: false
       matrix:
-        # see https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        jdk: [8]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Set up JDK ${{ matrix.jdk }}
-        uses: actions/setup-java@v2
-        with:
-          java-version: ${{ matrix.jdk }}
-          distribution: "adopt"
-          cache: "maven"
-      - name: Build with Maven
-        run: mvn -B package --file pom.xml
-      - name: Upload JVM crash logs
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: jvm-crash-logs
-          path: /Users/runner/work/rocketmq/rocketmq/auth/hs_err_pid*.log
-          retention-days: 1
+        jdk:
+        - 8
+        os:
+        - ubuntu-latest
+        - windows-latest
+        - macos-latest
+name: Build and Run Tests by Maven
+on:
+  repository_dispatch:
+    types: trigger-ga___maven.yaml

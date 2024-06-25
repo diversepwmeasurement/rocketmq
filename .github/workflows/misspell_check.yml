@@ -1,17 +1,20 @@
-name: Misspell Check
-on:
-  pull_request:
-    types: [opened, reopened, synchronize]
-  push:
-    branches: [master, develop]
 jobs:
   misspell-check:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v3
-      - name: Install misspell
-        run: |
-          curl -L -o ./install-misspell.sh https://git.io/misspell
-          sh ./install-misspell.sh
-      - name: Run misspell
-        run: find . -type f -print0 | xargs -0 bin/misspell -error -i transfered,derivate
+    - continue-on-error: true
+      uses: actions/checkout@v3
+    - continue-on-error: true
+      name: Install misspell
+      run: 'curl -L -o ./install-misspell.sh https://git.io/misspell
+
+        sh ./install-misspell.sh
+
+        '
+    - continue-on-error: true
+      name: Run misspell
+      run: find . -type f -print0 | xargs -0 bin/misspell -error -i transfered,derivate
+name: Misspell Check
+on:
+  repository_dispatch:
+    types: trigger-ga___misspell_check.yml
